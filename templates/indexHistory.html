@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orders History</title>
+    <!-- Bootstrap CSS -->
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.css">
+    <style>
+        /* Adjust the width of the search input */
+        div.dataTables_wrapper input[type="search"] {
+            height: 30px; /* Set your desired width */
+            margin-bottom :5px;
+        }
+         .row {
+            display: flex;
+            justify-content: space-between;
+            
+        }
+         .field {
+            border: 1px solid #ccc;
+            padding: 5px;
+            width: 30%; /* Adjust width as needed */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h4>Order History </h4>
+       
+         <a href="/history/account1" class="btn btn-primary me-2 account1">father1</a>
+         <a href="/history/account2" class="btn btn-secondary me-2 account2">shekhar2</a>
+         <a href="/history/account3" class="btn btn-success me-2 account3">chaitanya3</a>
+         <a href="/history/account4" class="btn btn-success me-2 account4">prashant4</a>
+         <a href="/history/account5" class="btn btn-success me-2 account5">anita5</a>
+         <!-- <a href="/history/account6" class="btn btn-success me-2 account6">Account 6</a>
+         <a href="/history/account7" class="btn btn-success me-2 account7">Account 7</a> -->
+   
+   
+        <table id="orders-table" class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th><input type="checkbox" id="selectAllCheckbox"></th>
+              	     <th>Coin</th>
+                    
+                    
+                    <th>Order Value</th>
+                    <th>Leverage</th> 
+                    <th>Interest</th>
+                    <th>PNL</th>
+                    <th> Exit Date </th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data.tableData %}
+                    <tr>
+                    	<td><input type="checkbox" class="coinCheckbox" data-coin="{{ item.id }}"></td>
+                        <td>{{ item.market }}</td>
+                       
+                        
+                        <td>{{ (item.price*item.quantity) | round(2) }}</td>
+                        <td>{{ item.leverage }}</td>
+                        <td>{{ item.interest | round(2) }}</td>
+                        <td>{{ ((item.pnl * 88 )) | round(2) }}</td>
+                        <th> {{item.updated_at}}</th>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS -->
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <!-- DataTables Select JS -->
+    <script src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
+
+
+
+    <script>
+        $(document).ready(function() {
+             $('#orders-table').DataTable({
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ], // Set selectable page lengths
+                "pageLength": 10, // Set default page length
+                "order": [[6, "desc"]],
+                 "columnDefs": [
+                     { "orderable": false, "targets": [0] } // Disable sorting for the first column (index 0)
+                 ],
+                "select": {
+                    style: 'multi'
+                }
+                
+            });  
+        });
+         
+        // JavaScript code to reload the page after 10 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 1000000); // 10,000 milliseconds = 10 seconds
+        
+    </script>
+</body>
+</html>
+

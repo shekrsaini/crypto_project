@@ -1,0 +1,8 @@
+Flask
+forex-python
+Flask-SQLAlchemy
+SQLAlchemy
+pymysql
+requests
+pandas
+

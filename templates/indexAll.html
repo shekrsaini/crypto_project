@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Orders Table</title>
+    <!-- Bootstrap CSS -->
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.css">
+    <style>
+        /* Adjust the width of the search input */
+        div.dataTables_wrapper input[type="search"] {
+            height: 30px; /* Set your desired width */
+            margin-bottom :5px;
+        }
+         .row {
+            display: flex;
+            justify-content: space-between;
+            
+        }
+         .field {
+            border: 1px solid #ccc;
+            padding: 5px;
+            width: 30%; /* Adjust width as needed */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h4>My Orders </h4>
+         <button id="apiCallBtn" class="btn btn-warning">Exit Selected Coins</button>
+         <a href="/coinPrice" class="btn btn-success me-2">Market Coins</a>
+         <a href="/history/account1" class="btn btn-success me-2">History </a>
+          <div class="modal" id="confirmationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p>Number of Selected Coins: <span id="selectedCoinsCount"></span></p>
+                    <p>Selected Coins:</p>
+                    <ul id="selectedCoinsList"></ul>
+                    <p>Do you want to Exit the below coins?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id="confirmBtn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+        <table id="orders-table" class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th><input type="checkbox" id="selectAllCheckbox"></th>
+              	     <th>Coin</th>
+                    <th>Change 24 hrs</th>
+                    <th>Account</th>
+                    <th>Quantity</th>
+                    <th>Order Value</th>
+                    <th>Leverage</th> 
+                    <th>Entry Price</th>
+                    <th>Current Price</th>
+                    <th>PNL</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                    <tr>
+                    	<td><input type="checkbox" class="coinCheckbox" data-coin="{{ item.id }}"></td>
+                        <td>{{ item.market }}</td>
+                        <td>{{item.change_24_hour}}</td>
+                        <td>{{item.account}}</td>
+                        <td>{{item.quantity}}</td>
+                        <td>{{ (item.price*item.quantity) | round(2) }}</td>
+                        <td>{{ item.leverage }}</td>
+                        <td>{{ item.price | round(2) }}</td>
+                        <td>{{ (item.last_price | float ) | round(2) }}</td>
+                        <td>{{ ((item.last_price | float - item.price | float) * (item.quantity * 88)) | round(2) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS -->
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <!-- DataTables Select JS -->
+    <script src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
+
+
+
+    <script>
+        $(document).ready(function() {
+             $('#orders-table').DataTable({
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ], // Set selectable page lengths
+                "pageLength": 100, // Set default page length
+                "order": [[9, "desc"]],
+                 "columnDefs": [
+                     { "orderable": false, "targets": [0] } // Disable sorting for the first column (index 0)
+                 ],
+                 
+                "select": {
+                    style: 'multi'
+                }
+                
+            });  
+        });
+          // Select All checkbox behavior
+            $('#selectAllCheckbox').on('change', function() {
+                $('.coinCheckbox').prop('checked', $(this).prop('checked'));
+            });
+
+            // Individual checkbox behavior
+            $('.coinCheckbox').on('change', function() {
+                $('#selectAllCheckbox').prop('checked', false);
+            });
+
+            // Trigger API call on button click
+            $('#apiCallBtn').on('click', function() {
+                var selectedCoins = [];
+                var selectedCoinsData = {};
+
+                $('.coinCheckbox:checked').each(function() {
+                    var coin = $(this).data('coin');
+    		     var account = $(this).closest('tr').find('td:eq(3)').text();
+    		    console.log(account)
+    
+                   if (!(account in selectedCoinsData)) {
+                       selectedCoinsData[account] = []; // Initialize if account not already present
+                   }
+    
+                    selectedCoinsData[account].push(coin);
+                    selectedCoins.push(coin);
+                });
+                
+                var selectedCoinsCount = selectedCoins.length;
+                for (var account in selectedCoinsData) {
+    			selectedCoinsData[account] = selectedCoinsData[account].join(', ');
+		 }
+
+                // Perform API call with selected coins
+                if (selectedCoins.length > 0) {
+                    $('#selectedCoinsCount').text(selectedCoinsCount);
+                    
+                    var selectedCoinsList = $('#selectedCoinsList');
+                    selectedCoinsList.empty(); // Clear previous selections
+
+                    $.each(selectedCoins, function(index, coin) {
+                        selectedCoinsList.append('<li>' + coin + '</li>'); // Append selected coins to list
+                    });
+                    $('#confirmationModal').modal('show');
+                    console.log(selectedCoinsData)
+                    // Replace the following line with your actual API call logic
+                    $('#confirmBtn').on('click', function() {
+                    	var currentURL = window.location.href;
+			var parts = currentURL.split('/');
+			var lastPart = parts[parts.length - 1];
+                    $.ajax({
+                        type: 'POST',
+                        url: '/exitAll',
+                        data: JSON.stringify(selectedCoinsData),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            console.log('API Call successful:', response);
+                            alert('Coin Exit Successfully');
+                            $('#confirmationModal').modal('hide');
+                            location.reload();
+                        },
+                        error: function(error) {
+                            console.error('API Call failed:', error);
+                             alert('Unable to Exit Coin');
+                            $('#confirmationModal').modal('hide');
+                            location.reload();
+                        }
+                    });
+                                        });
+
+                    console.log('API Call with selected coins:', selectedCoins);
+                } else {
+                    console.log('No coins selected.');
+                }
+            });
+        // JavaScript code to reload the page after 10 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 1000000); // 10,000 milliseconds = 10 seconds
+        
+    </script>
+</body>
+</html>
+

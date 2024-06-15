@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream_Data</title>
+</head>
+<body>
+
+    <h2>Updated DataFrame</h2>
+
+    <!-- Display the DataFrame as an HTML table -->
+    {{ table | safe }}
+
+    <!-- <p id="refresh-time"></p>
+
+    <script>
+        // Function to update the countdown timer
+        function updateTimer(minutes, seconds) {
+            const timerElement = document.getElementById('refresh-time');
+            timerElement.textContent = `Refreshing in ${minutes} minutes and ${seconds} seconds.`;
+        }
+
+        // Reload the page every 5 seconds (5000 milliseconds)
+        let countdown = 60*15;
+
+        function updateCountdown() {
+            const minutes = Math.floor(countdown / 60);
+            const seconds = countdown % 60;
+
+            updateTimer(minutes, seconds);
+            countdown--;
+
+            if (countdown < 0) {
+                location.reload();
+            } else {
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+
+        // Initial call to start the countdown
+        updateCountdown();
+    </script> -->
+
+    <!-- <script>
+        // Reload the page every 5 seconds (5000 milliseconds)
+        setTimeout(function(){
+            location.reload();
+        }, 5000);
+    </script> -->
+
+</body>
+</html>
